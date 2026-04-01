@@ -1,0 +1,100 @@
+/* Page Layout */
+.state-page {
+  padding: 20px 40px;
+  background-color: #f9fafb;
+  min-height: 100vh;
+  font-family: "Poppins", sans-serif;
+}
+
+/* Header */
+.state-header {
+  margin-bottom: 30px;
+}
+
+.state-header h2 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #222;
+}
+
+.state-header p {
+  color: #666;
+  margin-top: 5px;
+}
+
+/* Section Titles */
+.state-places h3,
+.state-posts h3 {
+  margin-bottom: 15px;
+  font-size: 22px;
+  color: #333;
+}
+
+/* Places Grid */
+.places-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+/* Place Card */
+.place-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.place-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.place-card img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+.place-card h4 {
+  font-size: 18px;
+  margin: 10px 12px 5px;
+  color: #222;
+}
+
+.place-card p {
+  font-size: 14px;
+  color: #666;
+  margin: 0 12px 12px;
+}
+
+/* Posts Section */
+.posts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Loading & Empty Text */
+.state-posts p,
+.places-grid p {
+  color: #777;
+  font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .state-page {
+    padding: 15px;
+  }
+
+  .state-header h2 {
+    font-size: 24px;
+  }
+
+  .place-card img {
+    height: 140px;
+  }
+}

@@ -1,0 +1,394 @@
+/* POST CARD */
+
+.post-card{
+  width: 320px;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  padding: 12px;
+  margin-bottom: 18px;
+
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start; /* stack tightly, avoid large gaps */
+  gap:10px;
+
+  transition: transform .25s ease, box-shadow .25s ease;
+  position: relative;
+}
+
+.post-card:hover{
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+}
+
+/* HEADER */
+
+.post-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.post-title{
+  display:block;
+  font-size:17px;
+  font-weight:600;
+  color:#111;
+  margin :0;
+}
+
+/* THREE DOT MENU */
+
+.post-menu{
+  position:relative;
+}
+
+.menu-icon{
+  cursor:pointer;
+  font-size:18px;
+  padding:5px;
+  color:#555;
+}
+
+/* DROPDOWN */
+
+.menu-dropdown{
+  position:absolute;
+  right:0;
+  top:26px;
+  background:white;
+  border-radius:10px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.18);
+  border:1px solid #eee;
+  display:flex;
+  flex-direction:column;
+  z-index:100;
+}
+
+.menu-dropdown button{
+  padding:9px 14px;
+  border:none;
+  background:none;
+  cursor:pointer;
+  font-size:14px;
+  text-align:left;
+}
+
+.menu-dropdown button:hover{
+  background:#f7f7f7;
+}
+
+.delete-btn{
+  color:#e11d48;
+}
+
+/* IMAGE */
+
+.post-image{
+  width:100%;
+  height:160px; /* smaller fixed height for compact look */
+  border-radius:14px;
+  overflow:hidden;
+  margin-top:8px;
+  flex-shrink:0;
+}
+
+.post-image img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+/* DESCRIPTION */
+
+.post-description{
+  margin-top:8px;
+  font-size:14px;
+  color:#555;
+  line-height:1.4;
+  margin-bottom:6px;
+}
+
+/* ACTIONS */
+
+.post-actions{
+  /* remove accidental hairline by avoiding tiny margins/borders */
+  margin-top:12px;
+  margin-bottom:0;
+  display:flex;
+  gap:12px;
+  justify-content:center;
+  align-items:center;
+  background:transparent;
+  border-top: none;
+  box-shadow: none;
+  padding-top: 6px;
+}
+
+/* BUTTON BASE */
+
+.post-actions button{
+  flex:0 0 auto;
+  min-width:86px;
+  padding:10px 14px;
+  border:none;
+  border-radius:24px;
+  background:#f3f4f6;
+  cursor:pointer;
+  font-size:13px;
+  font-weight:500;
+
+  display:flex;
+  align-items:center; 
+  justify-content:center;
+  gap:8px;
+
+  transition:all .18s ease;
+}
+
+/* ensure clear spacing between description and actions */
+.post-description + .post-actions{
+  margin-top:12px;
+}
+/* LIKE BUTTON */
+
+.post-actions button:nth-child(1){
+  background:#fcb5b9;
+  color:#111;
+}
+
+.post-actions button:nth-child(1):hover{
+  background:#fecdd3;
+}
+
+/* Heart icon colors */
+.heart{
+  color:#ffffff;
+  transition:color .15s ease;
+}
+.heart.liked{
+  color:#e11d48;
+}
+
+/* DISLIKE BUTTON */
+
+.post-actions button:nth-child(2){
+  background:#f1f5f9;
+  color:#475569;
+}
+
+.post-actions button:nth-child(2):hover{
+  background:#e2e8f0;
+}
+
+/* COMMENT BUTTON */
+
+.post-actions button:nth-child(3){
+  background:#eef2ff;
+  color:#4f46e5;
+}
+
+.post-actions button:nth-child(3):hover{
+  background:#e0e7ff;
+}
+
+/* COMMENT BOX */
+
+.comment-box{
+  margin-top:10px;
+  display:flex;
+  gap:8px;
+}
+
+.comment-box input{
+  flex:1;
+  padding:8px;
+  border-radius:8px;
+  border:1px solid #ddd;
+}
+
+.comment-box button{
+  padding:8px 12px;
+  border:none;
+  border-radius:8px;
+  background:#4f46e5;
+  color:white;
+  cursor:pointer;
+}
+
+/* EDIT MODAL */
+
+.edit-modal{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.45);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.edit-panel{
+  background:white;
+  padding:20px;
+  border-radius:14px;
+  width:320px;
+}
+
+.edit-panel input,
+.edit-panel textarea{
+  width:100%;
+  margin-top:10px;
+  padding:8px;
+  border-radius:6px;
+  border:1px solid #ddd;
+}
+
+.edit-actions{
+  margin-top:14px;
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+}
+
+.save-btn{
+  background:#22c55e;
+  color:white;
+  border:none;
+  padding:6px 12px;
+  border-radius:6px;
+}
+
+.cancel-btn{
+  background:#e5e7eb;
+  border:none;
+  padding:6px 12px;
+  border-radius:6px;
+}
+
+/* GRID */
+
+.postsGrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:22px;
+}
+
+.comments-list{
+  margin-top:10px;
+  max-height:120px;
+  overflow-y:auto;
+}
+
+.comment-item{
+  font-size:13px;
+  padding:6px 0;
+  border-bottom:1px solid #eee;
+}
+
+/* COMMENTS PANEL (context-like) */
+.comments-panel{
+  position:absolute;
+  right:12px;
+  bottom:64px;
+  width:280px;
+  max-height:300px;
+  background:#fff;
+  border-radius:12px;
+  box-shadow:0 12px 28px rgba(0,0,0,0.16);
+  border:1px solid #eee;
+  display:flex;
+  flex-direction:column;
+  z-index:120;
+  overflow:hidden;
+}
+
+.comments-panel .panel-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px 12px;
+  border-bottom:1px solid #f3f4f6;
+}
+
+.comments-panel .close-panel{
+  border:none;
+  background:none;
+  cursor:pointer;
+  font-size:14px;
+  color:#666;
+}
+
+.comments-panel .panel-list{
+  padding:8px 12px;
+  overflow:auto;
+  flex:1 1 auto;
+}
+
+.comments-panel .panel-input{
+  display:flex;
+  gap:8px;
+  padding:10px;
+  border-top:1px solid #f3f4f6;
+}
+
+.comments-panel .panel-input input{
+  flex:1;
+  padding:8px;
+  border-radius:8px;
+  border:1px solid #e6e6e6;
+}
+
+.comments-panel .panel-input button{
+  padding:8px 12px;
+  border-radius:8px;
+  border:none;
+  background:#4f46e5;
+  color:#fff;
+  cursor:pointer;
+}
+
+.comments-panel .empty{
+  color:#777;
+  padding:8px 0;
+}
+
+.comments-panel .comment-item{
+  padding:8px 0;
+  border-bottom:1px solid #f2f2f2;
+}
+
+.comments-panel .comment-text{
+  color:#444;
+  margin-left:6px;
+}
+  .user-avatar{
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    
+    border:2px solid #22c55e;
+    box-shadow:0 1px 3px rgba(0,0,0,0.12);
+  }
+
+  /* tighten header spacing when avatar is small */
+  .post-user{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex:1 1 auto;
+    min-width:0; /* allow shrinking so username won't wrap */
+  }
+
+  .user-info{display:flex;flex-direction:column;align-items:flex-start}
+
+  .user-name{
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    max-width:100%;
+  }

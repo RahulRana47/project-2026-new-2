@@ -1,0 +1,86 @@
+.login-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #2b2e6b, #3b3f8c);
+  font-family: Arial, sans-serif;
+}
+
+.login-card {
+  background: #ffffff;
+  padding: 35px;
+  width: 360px;
+  border-radius: 12px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+  text-align: center;
+}
+
+.login-card h2 {
+  margin-bottom: 25px;
+  color: #2b2e6b;
+}
+
+.login-card input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.login-card input:focus {
+  outline: none;
+  border-color: #3b3f8c;
+}
+
+.login-card button {
+  width: 100%;
+  padding: 12px;
+  background: #2b2e6b;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.login-card button:hover {
+  background: #1f2255;
+}
+
+.extra-text {
+  margin-top: 18px;
+  font-size: 13px;
+  color: #555;
+}
+
+.extra-text span {
+  color: #2b2e6b;
+  font-weight: 600;
+  cursor: pointer;
+}
+.forgot {
+  margin-top: 8px;
+}
+.password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.password-wrapper input {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.eye-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 18px;
+  user-select: none;
+}
