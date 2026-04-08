@@ -1,1 +1,39 @@
 @import "tailwindcss";
+
+/* Global resets and responsive base */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: ""Inter"", system-ui, -apple-system, sans-serif;
+  background: #f3f4f6;
+  color: #0f172a;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+  width: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+.muted {
+  color: #6b7280;
+  font-size: 14px;
+}

@@ -1,24 +1,24 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import "./Carasol.css";
 
 const slides = [
   {
     image:
-      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
-    title: "Bali, Indonesia",
-    subtitle: "Sacred temples and lush rice terraces",
+      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b",
+    title: "DISCOVER THE UNSEEN",
+    subtitle: "Himalayan Escapes",
   },
   {
     image:
-      "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1",
-    title: "Paris, France",
-    subtitle: "City of love and lights",
+      "https://plus.unsplash.com/premium_photo-1697729701846-e34563b06d47?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8dG91ciUyMGdvYXxlbnwwfHwwfHx8MA%3D%3D",
+    title: "ESCAPE THE ORDINARY",
+    subtitle: "Goa Vibes",
   },
   {
     image:
-      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
-    title: "Swiss Alps",
-    subtitle: "Snowy peaks and scenic beauty",
+      "https://images.unsplash.com/photo-1587135941948-670b381f08ce?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8dGFqJTIwbWFoYWx8ZW58MHx8MHx8fDA%3D",
+    title: "Taj Mahal",
+    subtitle: "Experience the beauty of India's greatest wonder",
   },
 ];
 
@@ -66,11 +66,11 @@ const Carasol = () => {
       </div>
 
       {/* Arrows */}
-      <button className="prev-btn" onClick={prevSlide}>
-        ❮
+      <button className="prev-btn" onClick={prevSlide} aria-label="Previous slide">
+        ‹
       </button>
-      <button className="next-btn" onClick={nextSlide}>
-        ❯
+      <button className="next-btn" onClick={nextSlide} aria-label="Next slide">
+        ›
       </button>
 
       {/* Dots */}
@@ -90,3 +90,5 @@ const Carasol = () => {
 };
 
 export default Carasol;
+
+

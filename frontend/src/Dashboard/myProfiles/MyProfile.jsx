@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
-import { getMe } from "../../services/api";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { loadUser } from "../../action/authActions";
 import CreatePost from "./CreatePost";
 import PostCard from "./PostCard";
 import "./MyProfile.css";
 
 const MyProfile = () => {
-  const [user, setUser] = useState(null);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { user, token, loading } = useSelector((state) => state.auth);
+
   const [posts, setPosts] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
@@ -16,7 +21,6 @@ const MyProfile = () => {
   });
   const [avatarFile, setAvatarFile] = useState(null);
 
-  const token = localStorage.getItem("token");
   const [showCreate, setShowCreate] = useState(false);
 
   const fetchMyPosts = async () => {
@@ -33,24 +37,27 @@ const MyProfile = () => {
   };
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const res = await getMe(token);
-
-      if (res.success) {
-        setUser(res.user);
-        setFormData({
-          name: res.user.name || "",
-          phone: res.user.phone || "",
-          avatar: res.user.avatar || "",
-          languages: res.user.languages || "",
-          location: res.user.location || "",
-        });
-      }
-    };
-
-    fetchUser();
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+    if (!user && !loading) {
+      dispatch(loadUser());
+    }
     fetchMyPosts();
-  }, [token]);
+  }, [token, user, loading, dispatch, navigate]);
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || "",
+        phone: user.phone || "",
+        avatar: user.avatar || "",
+        languages: user.languages || "",
+        location: user.location || "",
+      });
+    }
+  }, [user]);
 
   const handleChange = (e) => {
     setFormData({
@@ -92,9 +99,8 @@ const MyProfile = () => {
 
       if (res.ok && data.success) {
         alert("Profile updated successfully");
-        setUser(data.user);
-        // update local preview and clear avatarFile
-        setFormData((f) => ({ ...f, avatar: data.user.avatar || f.avatar }));
+        dispatch(loadUser());
+        setFormData((f) => ({ ...f, avatar: data.user?.avatar || f.avatar }));
         setAvatarFile(null);
       }
     } catch (error) {
@@ -103,7 +109,7 @@ const MyProfile = () => {
     }
   };
 
-  if (!user) return <p>Loading...</p>;
+  if (loading || !user) return <p>Loading...</p>;
 
   return (
     <div className="profile-wrapper">

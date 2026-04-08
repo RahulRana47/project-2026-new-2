@@ -1,5 +1,5 @@
 .categories {
-  padding: 60px 40px;
+  padding: clamp(24px, 6vw, 72px) clamp(16px, 5vw, 48px);
   background: #ffffff;
 }
 
@@ -51,9 +51,9 @@
 
 .category-card {
   position: relative;
-  min-width: 240px;
-  height: 160px;
-  border-radius: 16px;
+  min-width: 280px;
+  height: 190px;
+  border-radius: 18px;
   background-size: cover;
   background-position: center;
   cursor: pointer;
@@ -85,4 +85,19 @@
   font-size: 16px;
   font-weight: 600;
   z-index: 2;
+}
+
+@media (max-width: 900px) {
+  .categories-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 640px) {
+  .category-card {
+    min-width: 220px;
+    height: 170px;
+  }
 }

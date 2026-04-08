@@ -7,5 +7,5 @@
 
 .layout-content {
   flex: 1;
-  padding: 30px;
+  padding: clamp(16px, 4vw, 32px);
 }

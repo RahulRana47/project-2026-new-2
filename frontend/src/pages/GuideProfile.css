@@ -1,0 +1,141 @@
+.guide-profile.page{
+  padding:24px 32px 48px;
+  max-width:1100px;
+  margin:0 auto;
+  font-family:"Poppins",sans-serif;
+}
+
+.muted{
+  color:#64748b;
+}
+
+.guide-hero{
+  display:flex;
+  gap:22px;
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:18px;
+  padding:20px;
+  box-shadow:0 12px 28px rgba(15,23,42,0.08);
+}
+
+.guide-hero img{
+  width:180px;
+  height:180px;
+  object-fit:cover;
+  border-radius:16px;
+}
+
+.guide-meta h1{
+  margin:4px 0 6px;
+  font-size:28px;
+}
+
+.eyebrow{
+  text-transform:uppercase;
+  letter-spacing:0.12em;
+  font-size:12px;
+  font-weight:700;
+  color:#0ea5e9;
+}
+
+.guide-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin:12px 0 14px;
+}
+
+.pill{
+  background:#eef2ff;
+  color:#4338ca;
+  padding:6px 10px;
+  border-radius:999px;
+  font-weight:600;
+  border:1px solid #e0e7ff;
+  font-size:12px;
+}
+
+.guide-tags .pill{
+  background:#f1f5f9;
+  color:#0f172a;
+  border:1px solid #e2e8f0;
+}
+
+.cta-row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.primary-btn{
+  background:#0ea5e9;
+  color:#fff;
+  border:none;
+  border-radius:10px;
+  padding:10px 16px;
+  font-weight:700;
+  cursor:pointer;
+  box-shadow:0 10px 22px rgba(14,165,233,0.35);
+}
+
+.primary-btn:hover{
+  transform:translateY(-1px);
+}
+
+.ghost-btn{
+  background:#fff;
+  border:1px solid #cbd5e1;
+  border-radius:10px;
+  padding:10px 16px;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.guide-body{
+  margin-top:24px;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+.info-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:14px;
+}
+
+.info-grid div{
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  padding:12px;
+}
+
+.similar-row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.pill-link{
+  text-decoration:none;
+  background:#eef2ff;
+  color:#4338ca;
+  padding:8px 12px;
+  border-radius:999px;
+  font-weight:600;
+  border:1px solid #e0e7ff;
+}
+
+@media (max-width:700px){
+  .guide-hero{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .guide-hero img{
+    width:120px;
+    height:120px;
+  }
+}

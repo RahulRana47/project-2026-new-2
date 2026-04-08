@@ -1,5 +1,7 @@
-import { useState } from "react";
-import { loginUser } from "../services/api";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { login, clearAuthError } from "../action/authActions";
 import "./Login.css";
 
 export default function Login() {
@@ -7,14 +9,22 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const submit = async () => {
-    const res = await loginUser({ email, password });
-    if (res.token) {
-      localStorage.setItem("token", res.token);
-      window.location.href = "/dashboard";
-    } else {
-      alert(res.message);
-    }
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { token, loading, error } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (token) navigate("/dashboard");
+  }, [token, navigate]);
+
+  useEffect(() => {
+    return () => {
+      dispatch(clearAuthError());
+    };
+  }, [dispatch]);
+
+  const submit = () => {
+    dispatch(login(email, password));
   };
 
   return (
@@ -43,7 +53,11 @@ export default function Login() {
           </span>
         </div>
 
-        <button onClick={submit}>Login</button>
+        {error && <p className="error-text">{error}</p>}
+
+        <button onClick={submit} disabled={loading}>
+          {loading ? "Logging in..." : "Login"}
+        </button>
 
         <p className="extra-text forgot">
           Forgot password?{" "}

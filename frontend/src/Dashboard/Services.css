@@ -1,6 +1,6 @@
 .services {
   background: #f8f9fa;
-  padding: 60px 40px;
+  padding: clamp(32px, 6vw, 60px) clamp(16px, 5vw, 40px);
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 40px;
