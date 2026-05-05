@@ -40,8 +40,7 @@
 .navbar-center {
   display: flex;
   align-items: center;
-  gap: 15px;
-  width: 40%;
+  width: min(520px, 100%);
 }
 
 .search-box {
@@ -63,13 +62,6 @@
   background: transparent;
   outline: none;
   width: 100%;
-}
-
-.location-select {
-  padding: 8px 12px;
-  border-radius: 20px;
-  border: 1px solid #ddd;
-  cursor: pointer;
 }
 
 /* RIGHT */
@@ -219,16 +211,11 @@
   }
 
   .navbar-center .search-box,
-  .navbar-center .location-select,
   .navbar-right .search-box {
     width: 100%;
   }
 
   .search-box {
-    width: 100%;
-  }
-
-  .location-select {
     width: 100%;
   }
 

@@ -4,6 +4,64 @@
   padding: 20px;
 }
 
+.guide-dashboard-hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 28px;
+  margin-bottom: 24px;
+  border-radius: 24px;
+  color: #f8fafc;
+  background: linear-gradient(135deg, #0f172a 0%, #164e63 55%, #16a34a 100%);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
+}
+
+.guide-dashboard-eyebrow {
+  margin: 0 0 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 12px;
+  color: #bbf7d0;
+}
+
+.guide-dashboard-hero h1 {
+  margin: 0;
+  font-size: clamp(28px, 4vw, 40px);
+}
+
+.guide-dashboard-hero p {
+  max-width: 720px;
+  color: rgba(248, 250, 252, 0.88);
+}
+
+.guide-dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(140px, 1fr));
+  gap: 14px;
+  min-width: 320px;
+}
+
+.guide-stat-card {
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+}
+
+.guide-stat-card span {
+  display: block;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #d1fae5;
+}
+
+.guide-stat-card strong {
+  display: block;
+  margin-top: 10px;
+  font-size: 28px;
+}
+
 .profile-card {
   display: flex;
   gap: 50px;
@@ -60,6 +118,12 @@
 .profile-right .email {
   color: gray;
   margin-bottom: 20px;
+}
+
+.profile-status {
+  margin: 0 0 18px;
+  color: #0f766e;
+  font-weight: 600;
 }
 
 .profile-form {
@@ -173,6 +237,11 @@
   margin-bottom:20px;
 }
 
+.my-post-subtitle {
+  margin: 0;
+  color: #64748b;
+}
+
 .my-post-title{
   font-size: 22px;
   font-weight: 700;
@@ -208,6 +277,18 @@
 
 .create-post-btn:hover{
   background:#16a34a;
+}
+
+.profile-empty-card {
+  padding: 26px;
+  border-radius: 18px;
+  background: white;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.profile-empty-card h2,
+.profile-empty-card h3 {
+  margin-top: 0;
 }
 
 /* ACTION BUTTONS */
@@ -264,4 +345,20 @@
   display:flex;
   justify-content:flex-end;
   gap:10px;
+}
+
+@media (max-width: 900px) {
+  .guide-dashboard-hero,
+  .profile-card {
+    flex-direction: column;
+  }
+
+  .guide-dashboard-stats,
+  .profile-form {
+    grid-template-columns: 1fr;
+  }
+
+  .update-btn {
+    grid-column: span 1;
+  }
 }

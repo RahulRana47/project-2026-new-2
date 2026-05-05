@@ -20,8 +20,8 @@ const MyProfile = () => {
     location: "",
   });
   const [avatarFile, setAvatarFile] = useState(null);
-
   const [showCreate, setShowCreate] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
 
   const fetchMyPosts = async () => {
     try {
@@ -44,8 +44,25 @@ const MyProfile = () => {
     if (!user && !loading) {
       dispatch(loadUser());
     }
-    fetchMyPosts();
   }, [token, user, loading, dispatch, navigate]);
+
+  useEffect(() => {
+    if (!user || !token) return;
+
+    const role = (user.role || "").toLowerCase();
+
+    if (role === "admin") {
+      navigate("/dashboard/admin");
+      return;
+    }
+
+    if (role !== "guide") {
+      navigate("/dashboard");
+      return;
+    }
+
+    fetchMyPosts();
+  }, [user, token, navigate]);
 
   useEffect(() => {
     if (user) {
@@ -98,21 +115,56 @@ const MyProfile = () => {
       const data = await res.json();
 
       if (res.ok && data.success) {
-        alert("Profile updated successfully");
+        setStatusMessage("Profile updated successfully.");
         dispatch(loadUser());
         setFormData((f) => ({ ...f, avatar: data.user?.avatar || f.avatar }));
         setAvatarFile(null);
+      } else {
+        setStatusMessage(data?.message || "Unable to update profile.");
       }
     } catch (error) {
       console.error(error);
-      alert("Error updating profile");
+      setStatusMessage("Error updating profile.");
     }
   };
 
   if (loading || !user) return <p>Loading...</p>;
 
+  const role = (user.role || "").toLowerCase();
+
+  if (role !== "guide") {
+    return (
+      <div className="profile-wrapper">
+        <div className="profile-empty-card">
+          <h2>Guide dashboard only</h2>
+          <p>This private dashboard is available only for guide accounts.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="profile-wrapper">
+      <div className="guide-dashboard-hero">
+        <div>
+          <p className="guide-dashboard-eyebrow">Guide Dashboard</p>
+          <h1>Manage your own profile and posts</h1>
+          <p>
+            Only your authenticated guide account can open this area, update your profile, and
+            manage the posts created from your own account.
+          </p>
+        </div>
+        <div className="guide-dashboard-stats">
+          <div className="guide-stat-card">
+            <span>Your Role</span>
+            <strong>Guide</strong>
+          </div>
+          <div className="guide-stat-card">
+            <span>Your Posts</span>
+            <strong>{posts.length}</strong>
+          </div>
+        </div>
+      </div>
 
       <div className="profile-card">
 
@@ -138,6 +190,7 @@ const MyProfile = () => {
 
           <h2>{user.name}</h2>
           <p className="email">{user.email}</p>
+          {statusMessage && <p className="profile-status">{statusMessage}</p>}
 
           <form onSubmit={handleSubmit} className="profile-form">
 
@@ -197,12 +250,15 @@ const MyProfile = () => {
         <div className="posts-header">
           <button
             className="create-post-btn"
-            onClick={() => setShowCreate((s) => !s)}
+            onClick={() => setShowCreate((current) => !current)}
           >
-            {showCreate ? "Close" : "Create Post"}
+            {showCreate ? "Close Create Post" : "Create Post"}
           </button>
-
           <h3 className="my-post-title">My Posts</h3>
+          <p className="my-post-subtitle">
+            Only posts created by your guide account appear here, and only you can edit or delete
+            them.
+          </p>
         </div>
 
         {showCreate && (
@@ -213,7 +269,10 @@ const MyProfile = () => {
         )}
 
         {posts.length === 0 ? (
-          <p>No posts yet.</p>
+          <div className="profile-empty-card">
+            <h3>No posts yet</h3>
+            <p>Create your first guide post to start sharing destinations and travel updates.</p>
+          </div>
         ) : (
           <div className="posts-grid">
 
@@ -222,6 +281,7 @@ const MyProfile = () => {
                 key={post._id}
                 post={post}
                 refreshPosts={fetchMyPosts}
+                currentUser={user}
                 showMenu={true}
               />
             ))}

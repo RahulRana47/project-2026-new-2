@@ -68,7 +68,7 @@ export default function Login() {
 
         <p className="extra-text">
           Don’t have an account?{" "}
-          <span onClick={() => (window.location.href = "/")}>
+          <span onClick={() => (window.location.href = "/register")}>
             Register
           </span>
         </p>

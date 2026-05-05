@@ -1,39 +1,25 @@
-﻿import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { loadUser, logout } from "../action/authActions";
-import { fetchPosts } from "../action/postActions";
-import { setLocationFilter } from "../action/uiActions";
 import "./Navbar.css";
 
 const Navbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [location, setLocation] = useState("");
   const dropdownRef = useRef(null);
   const closeMobile = () => setMobileOpen(false);
 
   const { user, token, loading, error } = useSelector((state) => state.auth);
-  const { posts = [], loading: postsLoading } = useSelector((state) => state.post || {});
-  const locationFilter = useSelector((state) => state.ui?.locationFilter || "");
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Fetch logged-in user once token is available
   useEffect(() => {
     if (token && !user && !loading && !error) {
       dispatch(loadUser());
     }
   }, [token, user, loading, error, dispatch]);
 
-  // Load posts for dynamic locations list
-  useEffect(() => {
-    if (!posts.length && !postsLoading) {
-      dispatch(fetchPosts());
-    }
-  }, [posts.length, postsLoading, dispatch]);
-
-  // Close dropdown on outside click or scroll
   useEffect(() => {
     if (!dropdownOpen) return;
 
@@ -56,7 +42,6 @@ const Navbar = () => {
     };
   }, [dropdownOpen]);
 
-  // collapse mobile menu when viewport grows
   useEffect(() => {
     const onResize = () => {
       if (window.innerWidth > 960 && mobileOpen) {
@@ -72,30 +57,11 @@ const Navbar = () => {
     navigate("/login");
   };
 
-  // Build unique location options (city, fallback state)
-  const locationOptions = useMemo(() => {
-    const set = new Set();
-    posts.forEach((p) => {
-      const loc = p?.location;
-      if (!loc) return;
-      if (typeof loc === "string") {
-        set.add(loc);
-        return;
-      }
-      if (loc.city) set.add(loc.city);
-      else if (loc.state) set.add(loc.state);
-    });
-    return Array.from(set).sort((a, b) => a.localeCompare(b));
-  }, [posts]);
-
-  // keep local select in sync with global filter
-  useEffect(() => {
-    setLocation(locationFilter);
-  }, [locationFilter]);
+  const isAdmin = (user?.role || "").toLowerCase() === "admin";
+  const isGuide = (user?.role || "").toLowerCase() === "guide";
 
   return (
     <div className="navbar">
-      {/* Left */}
       <div className="navbar-left">
         <Link
           to="/dashboard"
@@ -123,32 +89,13 @@ const Navbar = () => {
         <i className={`fa ${mobileOpen ? "fa-times" : "fa-bars"}`}></i>
       </button>
 
-      {/* Center */}
       <div className={`navbar-center ${mobileOpen ? "show" : ""}`}>
         <div className="search-box">
           <i className="fa fa-search"></i>
           <input type="text" placeholder="Search guides by name or location..." />
         </div>
-
-        <select
-          className="location-select"
-          value={location}
-          onChange={(e) => {
-            const val = e.target.value;
-            setLocation(val);
-            dispatch(setLocationFilter(val));
-          }}
-        >
-          <option value="">All Locations</option>
-          {locationOptions.map((loc) => (
-            <option key={loc} value={loc}>
-              {loc}
-            </option>
-          ))}
-        </select>
       </div>
 
-      {/* Right */}
       <div className={`navbar-right ${mobileOpen ? "show" : ""}`} ref={dropdownRef}>
         <div className="nav-home-link" style={{ marginRight: 12 }}>
           <Link
@@ -189,15 +136,45 @@ const Navbar = () => {
               <small>{user.email}</small>
             </div>
 
-            <div className="dropdown-item" onClick={() => { navigate("/dashboard/myprofile"); closeMobile(); }}>
-              My Profile
+            <div
+              className="dropdown-item"
+              onClick={() => {
+                navigate(isGuide ? "/dashboard/guide" : "/dashboard/myprofile");
+                closeMobile();
+              }}
+            >
+              {isGuide ? "Guide Dashboard" : "My Profile"}
             </div>
 
-            <div className="dropdown-item" onClick={() => { navigate("/settings"); closeMobile(); }}>
+            {isAdmin && (
+              <div
+                className="dropdown-item"
+                onClick={() => {
+                  navigate("/dashboard/admin");
+                  closeMobile();
+                }}
+              >
+                Admin Panel
+              </div>
+            )}
+
+            <div
+              className="dropdown-item"
+              onClick={() => {
+                navigate("/settings");
+                closeMobile();
+              }}
+            >
               Settings
             </div>
 
-            <div className="dropdown-item logout" onClick={() => { handleLogout(); closeMobile(); }}>
+            <div
+              className="dropdown-item logout"
+              onClick={() => {
+                handleLogout();
+                closeMobile();
+              }}
+            >
               Log Out
             </div>
           </div>
@@ -208,4 +185,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-

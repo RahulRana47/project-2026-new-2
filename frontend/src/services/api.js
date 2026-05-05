@@ -95,28 +95,22 @@ export const resendOtp = async (email) => {
 };
 
 export const getGuides = async () => {
-  // Always attempt live API first; fallback only if nothing responds.
-  const token = localStorage.getItem("token");
   const candidateUrls = [`${API_BASE}/api/guides`, `${AUTH_BASE_URL}/guides`];
 
   for (const url of candidateUrls) {
     try {
-      const res = await fetch(url, { headers: buildAuthHeaders(token) });
-
+      const res = await fetch(url);
       if (res.ok) {
         const parsed = await parseJSON(res);
-        // Accept either { guides: [...] } or raw array
         if ((parsed?.guides && parsed.guides.length) || Array.isArray(parsed)) {
           return parsed;
         }
       }
-
       if (res.status !== 404) {
         return parseJSON(res);
       }
     } catch (err) {
       console.warn("Guide fetch failed for", url, err);
-      // try next candidate
     }
   }
 
@@ -125,13 +119,26 @@ export const getGuides = async () => {
 
 // POSTS API
 export const getPosts = async (page = 1, limit = 10) => {
-  const token = localStorage.getItem("token");
-  const res = await fetch(`${API_BASE}/api/posts/all?page=${page}&limit=${limit}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const res = await fetch(`${API_BASE}/api/posts/all?page=${page}&limit=${limit}`);
   return parseJSON(res);
+};
+
+const appendLocationFields = (formData, location) => {
+  if (!location) return;
+
+  if (typeof location === "string") {
+    formData.append("location", location);
+    return;
+  }
+
+  if (location.state) formData.append("location[state]", location.state);
+  if (location.city) formData.append("location[city]", location.city);
+  if (location.coordinates?.lat !== undefined && location.coordinates?.lat !== "") {
+    formData.append("location[coordinates][lat]", location.coordinates.lat);
+  }
+  if (location.coordinates?.lng !== undefined && location.coordinates?.lng !== "") {
+    formData.append("location[coordinates][lng]", location.coordinates.lng);
+  }
 };
 
 export const createPost = async ({ title, body, photoFile, location }) => {
@@ -140,14 +147,12 @@ export const createPost = async ({ title, body, photoFile, location }) => {
   const formData = new FormData();
   formData.append("title", title || "");
   formData.append("body", body || "");
-  if (location !== undefined) formData.append("location", location || "");
+  appendLocationFields(formData, location);
   if (photoFile) formData.append("photo", photoFile);
 
   const res = await fetch(`${API_BASE}/api/posts/create`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
     body: formData,
   });
 
@@ -157,9 +162,7 @@ export const createPost = async ({ title, body, photoFile, location }) => {
 export const getMyPosts = async () => {
   const token = localStorage.getItem("token");
   const res = await fetch(`${API_BASE}/api/posts/me`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
   return parseJSON(res);
 };
@@ -170,15 +173,13 @@ export const updatePost = async (postId, { title, body, photoFile, location }) =
   const formData = new FormData();
   if (title !== undefined) formData.append("title", title);
   if (body !== undefined) formData.append("body", body);
-  if (location !== undefined) formData.append("location", location);
+  appendLocationFields(formData, location);
   if (photoFile) formData.append("photo", photoFile);
 
-  
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
   const res = await fetch(`${API_BASE}/api/posts/update/${postId}`, {
     method: "PUT",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers,
     body: formData,
   });
   return parseJSON(res);
@@ -188,9 +189,7 @@ export const deletePost = async (postId) => {
   const token = localStorage.getItem("token");
   const res = await fetch(`${API_BASE}/api/posts/delete/${postId}`, {
     method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
   return parseJSON(res);
 };
@@ -200,9 +199,7 @@ export const likePost = async (postId) => {
 
   const res = await fetch(`${API_BASE}/api/posts/like/${postId}`, {
     method: "PUT",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
 
   return parseJSON(res);
@@ -213,9 +210,7 @@ export const dislikePost = async (postId) => {
 
   const res = await fetch(`${API_BASE}/api/posts/unlike/${postId}`, {
     method: "PUT",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
 
   return parseJSON(res);
@@ -224,12 +219,14 @@ export const dislikePost = async (postId) => {
 export const commentPost = async (postId, text) => {
   const token = localStorage.getItem("token");
 
+  const headers = {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+
   const res = await fetch(`${API_BASE}/api/posts/comment/${postId}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
+    headers,
     body: JSON.stringify({ text }),
   });
 
@@ -241,9 +238,7 @@ export const deleteComment = async (postId, commentId) => {
 
   const res = await fetch(`${API_BASE}/api/posts/comment/${postId}/${commentId}`, {
     method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
 
   return parseJSON(res);
