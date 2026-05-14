@@ -6,6 +6,7 @@ const CreatePost = ({ refreshPosts, onClose }) => {
 
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [price, setPrice] = useState("");
   const [photoFile, setPhotoFile] = useState(null);
   const [location, setLocation] = useState("");
   const [preview, setPreview] = useState(null);
@@ -27,20 +28,21 @@ const CreatePost = ({ refreshPosts, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!title || !body) {
-      alert("Please provide title and description");
+    if (!title || !body || price === "") {
+      alert("Please provide title, description, and price");
       return;
     }
 
     setLoading(true);
 
     try {
-      const res = await createPost({ title, body, photoFile, location });
+      const res = await createPost({ title, body, price, photoFile, location });
 
       if (res && (res.post || res.success)) {
 
         setTitle("");
         setBody("");
+        setPrice("");
         setPhotoFile(null);
         setPreview(null);
 
@@ -106,6 +108,15 @@ const CreatePost = ({ refreshPosts, onClose }) => {
           placeholder="Share your travel experience..."
           value={body}
           onChange={(e) => setBody(e.target.value)}
+        />
+
+        <input
+          type="number"
+          min="0"
+          step="any"
+          placeholder="Price"
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
         />
 
           {/* Location */}

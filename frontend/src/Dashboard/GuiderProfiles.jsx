@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { setLocationFilter } from "../action/uiActions";
 import { getGuides } from "../services/api";
 import "./GuiderProfiles.css";
@@ -19,6 +19,7 @@ const GuiderProfiles = () => {
   const [filteredGuides, setFilteredGuides] = useState([]);
   const [search, setSearch] = useState("");
   const dispatch = useDispatch();
+  const routeLocation = useLocation();
   const location = useSelector((state) => state.ui?.locationFilter || "");
   const liveCount = filteredGuides.length || guides.length;
 
@@ -55,10 +56,19 @@ const GuiderProfiles = () => {
   };
 
   useEffect(() => {
+    const params = new URLSearchParams(routeLocation.search);
+    setSearch(params.get("search") || "");
+  }, [routeLocation.search]);
+
+  useEffect(() => {
     const filtered = guides.filter((guide) => {
       const name = (guide.name || "").toLowerCase();
       const locString = formatLocation(guide.location).toLowerCase();
-      const matchesSearch = name.includes(search.toLowerCase());
+      const normalizedSearch = search.toLowerCase().trim();
+      const matchesSearch =
+        normalizedSearch === "" ||
+        name.includes(normalizedSearch) ||
+        locString.includes(normalizedSearch);
       const matchesLocation =
         location === "" || locString.includes(location.toLowerCase());
 
@@ -84,7 +94,7 @@ const GuiderProfiles = () => {
   }, [guides]);
 
   return (
-    <div className="guides-section">
+    <div className="guides-section" id="guides">
       <div className="guides-header">
         <div className="header-left">
           <h1>Available Guides Near You</h1>

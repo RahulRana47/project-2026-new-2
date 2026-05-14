@@ -192,6 +192,7 @@ const PostCard = ({ post, refreshPosts, currentUser, showMenu = false }) => {
     setEditing(type);
     if (type === "title") setEditValue(post.title || "");
     if (type === "body") setEditValue(post.body || "");
+    if (type === "price") setEditValue(post.price ?? "");
   };
 
   const handleUpdate = async () => {
@@ -200,6 +201,7 @@ const PostCard = ({ post, refreshPosts, currentUser, showMenu = false }) => {
       const payload = {};
       if (editing === "title") payload.title = editValue;
       if (editing === "body") payload.body = editValue;
+      if (editing === "price") payload.price = editValue;
       if (editing === "photo") payload.photoFile = editFile;
 
       await updatePost(post._id, payload);
@@ -262,6 +264,7 @@ const PostCard = ({ post, refreshPosts, currentUser, showMenu = false }) => {
               <div className="menu-dropdown">
                 <button onClick={() => openEdit("title")}>Edit Title</button>
                 <button onClick={() => openEdit("body")}>Edit Description</button>
+                <button onClick={() => openEdit("price")}>Edit Price</button>
                 <button onClick={() => openEdit("photo")}>Change Image</button>
                 <button className="delete-btn" onClick={handleDelete} disabled={loading}>
                   Delete Post
@@ -283,6 +286,10 @@ const PostCard = ({ post, refreshPosts, currentUser, showMenu = false }) => {
       {/* DESCRIPTION */}
       <div className="post-description">
         <p>{post.body || post.description}</p>
+      </div>
+
+      <div className="post-description">
+        <p>{post.price !== undefined ? `Price: Rs. ${post.price}` : "Price not provided"}</p>
       </div>
 
       {/* ACTION BUTTONS */}
@@ -371,12 +378,22 @@ const PostCard = ({ post, refreshPosts, currentUser, showMenu = false }) => {
                 ? "Edit Title"
                 : editing === "body"
                 ? "Edit Description"
+                : editing === "price"
+                ? "Edit Price"
                 : "Change Image"}
             </h4>
 
-            {(editing === "title" || editing === "body") && (
+            {(editing === "title" || editing === "body" || editing === "price") && (
               editing === "title" ? (
                 <input
+                  value={editValue}
+                  onChange={(e) => setEditValue(e.target.value)}
+                />
+              ) : editing === "price" ? (
+                <input
+                  type="number"
+                  min="0"
+                  step="any"
                   value={editValue}
                   onChange={(e) => setEditValue(e.target.value)}
                 />

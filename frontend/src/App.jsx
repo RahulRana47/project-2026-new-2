@@ -10,6 +10,8 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import GuideProfile from "./pages/GuideProfile";
 import AdminPanel from "./pages/AdminPanel";
+import BookingsPage from "./pages/BookingsPage";
+import MessagesPage from "./pages/MessagesPage";
 
 function App() {
   return (
@@ -33,12 +35,12 @@ function App() {
         />
         <Route path="/state/:stateName" element={<StateDetails />} />
         <Route path="/guide/:guideId" element={<GuideProfile />} />
+        <Route path="/dashboard/bookings" element={<BookingsPage />} />
+        <Route path="/dashboard/messages" element={<MessagesPage />} />
         <Route
           path="/dashboard/myprofile"
           element={
-            <DashboardLayout>
-              <MyProfile />
-            </DashboardLayout>
+            <BookingsPage />
           }
         />
       </Routes>

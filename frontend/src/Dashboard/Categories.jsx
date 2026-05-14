@@ -1,6 +1,6 @@
 ﻿import "./Categories.css";
 import { useRef, useEffect, useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
@@ -39,6 +39,11 @@ const Categories = () => {
     };
   }, []);
 
+  const routeLocation = useLocation();
+  const searchTerm = useMemo(() => {
+    return new URLSearchParams(routeLocation.search).get("search")?.toLowerCase().trim() || "";
+  }, [routeLocation.search]);
+
   const stateCards = useMemo(() => {
     const grouped = new Map();
 
@@ -46,7 +51,19 @@ const Categories = () => {
       const loc = p?.location;
       const stateName =
         typeof loc === "string" ? loc : (loc?.state || "").trim();
+      const cityName =
+        typeof loc === "string" ? "" : (loc?.city || "").trim();
       if (!stateName) return;
+
+      const normalizedState = stateName.toLowerCase();
+      const normalizedCity = cityName.toLowerCase();
+      const matchSearch =
+        !searchTerm ||
+        normalizedState.includes(searchTerm) ||
+        normalizedCity.includes(searchTerm);
+
+      if (!matchSearch) return;
+
       const current = grouped.get(stateName) || [];
       current.push(p);
       grouped.set(stateName, current);
@@ -63,7 +80,7 @@ const Categories = () => {
         return { title, image, count: list.length };
       })
       .sort((a, b) => a.title.localeCompare(b.title));
-  }, [posts]);
+  }, [posts, searchTerm]);
 
   return (
     <div className="categories bg-white px-6 md:px-10 py-12">

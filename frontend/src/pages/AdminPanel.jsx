@@ -9,6 +9,7 @@ import "./AdminPanel.css";
 const initialForm = {
   title: "",
   body: "",
+  price: "",
   state: "",
   city: "",
   lat: "",
@@ -138,9 +139,9 @@ export default function AdminPanel() {
       return;
     }
 
-    if (!form.title || !form.body || !form.state || !form.city || !photoFile) {
+    if (!form.title || !form.body || form.price === "" || !form.state || !form.city || !photoFile) {
       setIsError(true);
-      setMessage("Please fill title, description, state, city, and image.");
+      setMessage("Please fill title, description, price, state, city, and image.");
       return;
     }
 
@@ -152,6 +153,7 @@ export default function AdminPanel() {
       const response = await createPost({
         title: form.title,
         body: form.body,
+        price: form.price,
         photoFile,
         location: {
           state: form.state,
@@ -276,6 +278,19 @@ export default function AdminPanel() {
                   name="body"
                   placeholder="A historic region known for its mountains, culture, and scenic routes."
                   value={form.body}
+                  onChange={handleChange}
+                />
+              </label>
+
+              <label>
+                <span>Price</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="any"
+                  name="price"
+                  placeholder="1500"
+                  value={form.price}
                   onChange={handleChange}
                 />
               </label>
@@ -408,6 +423,7 @@ export default function AdminPanel() {
                         <p>{post?.body || post?.description || "No description available."}</p>
                         <div className="admin-panel__item-meta">
                           <span>{locationText || "Location not provided"}</span>
+                          <span>{post?.price !== undefined ? `Rs. ${post.price}` : "No price"}</span>
                           <span>{post?.likes?.length || 0} likes</span>
                         </div>
                         <div className="admin-panel__item-actions">

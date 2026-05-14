@@ -77,14 +77,7 @@ const State = () => {
     return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, [posts, guides]);
 
-  const filteredPosts = useMemo(() => {
-    if (!cityFilter) return posts;
-    return posts.filter((p) => {
-      const loc = p?.location;
-      const city = typeof loc === "string" ? loc : loc?.city;
-      return city?.toLowerCase() === cityFilter.toLowerCase();
-    });
-  }, [cityFilter, posts]);
+  const filteredPosts = useMemo(() => posts, [posts]);
 
   const filteredGuides = useMemo(() => {
     if (!cityFilter) return guides;
@@ -108,24 +101,23 @@ const State = () => {
     const load = async () => {
       setLoading(true);
       try {
-        const res = await getPosts(1, 50);
+        const filters = { state: decoded };
+        if (cityFilter) filters.city = cityFilter;
+        const res = await getPosts(1, 50, filters);
 
         if (!mounted) return;
 
-        if (res && res.success && Array.isArray(res.posts)) {
-          const filtered = res.posts.filter((p) => {
-            const text = `${p.title || ""} ${p.body || ""}`.toLowerCase();
-            return text.includes(decoded.toLowerCase());
-          });
-          setPosts(filtered);
-        } else if (res && Array.isArray(res.posts)) {
+        if (Array.isArray(res?.posts)) {
           setPosts(res.posts);
+        } else {
+          setPosts([]);
         }
       } catch (err) {
         console.error(err);
+        if (mounted) setPosts([]);
       }
 
-      setLoading(false);
+      if (mounted) setLoading(false);
     };
 
     load();
@@ -133,7 +125,7 @@ const State = () => {
     return () => {
       mounted = false;
     };
-  }, [decoded]);
+  }, [decoded, cityFilter]);
 
   useEffect(() => {
     let mounted = true;
