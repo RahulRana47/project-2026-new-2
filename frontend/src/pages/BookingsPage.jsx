@@ -139,6 +139,7 @@ const BookingsPage = () => {
     try {
       const response = await cancelBooking(bookingId);
       setMessage(response?.message || "Booking cancelled successfully.");
+      window.dispatchEvent(new CustomEvent("notification:sync"));
       await loadDashboard();
     } catch (requestError) {
       setError(requestError?.message || "Unable to cancel booking.");
@@ -155,6 +156,7 @@ const BookingsPage = () => {
     try {
       const response = await updateBookingStatus(bookingId, status);
       setMessage(response?.message || `Booking marked as ${status}.`);
+      window.dispatchEvent(new CustomEvent("notification:sync"));
       await loadDashboard();
     } catch (requestError) {
       setError(requestError?.message || "Unable to update booking.");

@@ -272,6 +272,7 @@ const MessagesPage = () => {
         );
       }
 
+      window.dispatchEvent(new CustomEvent("notification:sync"));
       setDraft("");
     } catch (error) {
       setSendError(error?.message || "Unable to send this message.");

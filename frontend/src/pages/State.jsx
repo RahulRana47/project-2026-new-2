@@ -5,6 +5,84 @@ import PostCard from "../Dashboard/myProfiles/PostCard";
 import Navbar from "../Dashboard/Navbar";
 import "./State.css";
 
+const POSTS_PAGE_SIZE = 12;
+
+const buildPageItems = (currentPage, totalPages) => {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
+
+  const pages = new Set([1, totalPages, currentPage, currentPage - 1, currentPage + 1]);
+
+  if (currentPage <= 4) {
+    [2, 3, 4, 5].forEach((page) => pages.add(page));
+  }
+
+  if (currentPage >= totalPages - 3) {
+    [totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1].forEach((page) => pages.add(page));
+  }
+
+  const sortedPages = Array.from(pages)
+    .filter((page) => page >= 1 && page <= totalPages)
+    .sort((a, b) => a - b);
+
+  return sortedPages.reduce((items, page, index) => {
+    const previousPage = sortedPages[index - 1];
+    if (previousPage && page - previousPage > 1) {
+      items.push(`ellipsis-${previousPage}-${page}`);
+    }
+    items.push(page);
+    return items;
+  }, []);
+};
+
+const RoundedPagination = ({ currentPage, totalPages, onPageChange, disabled }) => {
+  if (totalPages <= 1) return null;
+
+  return (
+    <nav className="rounded-pagination state-pagination" aria-label="State posts pagination">
+      <button
+        type="button"
+        className="pagination-arrow"
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={disabled || currentPage <= 1}
+        aria-label="Previous page"
+      >
+        <span aria-hidden="true">{"<"}</span>
+      </button>
+
+      {buildPageItems(currentPage, totalPages).map((item) =>
+        typeof item === "number" ? (
+          <button
+            type="button"
+            key={item}
+            className={`pagination-page ${item === currentPage ? "is-active" : ""}`}
+            onClick={() => onPageChange(item)}
+            disabled={disabled || item === currentPage}
+            aria-current={item === currentPage ? "page" : undefined}
+          >
+            {item}
+          </button>
+        ) : (
+          <span className="pagination-ellipsis" key={item} aria-hidden="true">
+            ...
+          </span>
+        )
+      )}
+
+      <button
+        type="button"
+        className="pagination-arrow"
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={disabled || currentPage >= totalPages}
+        aria-label="Next page"
+      >
+        <span aria-hidden="true">{">"}</span>
+      </button>
+    </nav>
+  );
+};
+
 const staticPlaces = {
   Chandigarh: [
     {
@@ -55,6 +133,12 @@ const State = () => {
   const [guides, setGuides] = useState([]);
   const [guidesLoading, setGuidesLoading] = useState(false);
   const [cityFilter, setCityFilter] = useState("");
+  const [postsPage, setPostsPage] = useState(1);
+  const [postsMeta, setPostsMeta] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalPosts: 0,
+  });
 
   const heroImage = useMemo(
     () => heroImages[decoded] || "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1600&q=80",
@@ -103,18 +187,32 @@ const State = () => {
       try {
         const filters = { state: decoded };
         if (cityFilter) filters.city = cityFilter;
-        const res = await getPosts(1, 50, filters);
+        const res = await getPosts(postsPage, POSTS_PAGE_SIZE, filters);
 
         if (!mounted) return;
 
         if (Array.isArray(res?.posts)) {
+          const nextTotalPages = Math.max(1, Number(res?.totalPages) || 1);
+
+          if (postsPage > nextTotalPages) {
+            setPostsPage(nextTotalPages);
+            return;
+          }
+
           setPosts(res.posts);
+          setPostsMeta({
+            currentPage: Number(res?.currentPage) || postsPage,
+            totalPages: nextTotalPages,
+            totalPosts: Number(res?.totalPosts) || res.posts.length,
+          });
         } else {
           setPosts([]);
+          setPostsMeta({ currentPage: 1, totalPages: 1, totalPosts: 0 });
         }
       } catch (err) {
         console.error(err);
         if (mounted) setPosts([]);
+        if (mounted) setPostsMeta({ currentPage: 1, totalPages: 1, totalPosts: 0 });
       }
 
       if (mounted) setLoading(false);
@@ -125,7 +223,7 @@ const State = () => {
     return () => {
       mounted = false;
     };
-  }, [decoded, cityFilter]);
+  }, [decoded, cityFilter, postsPage]);
 
   useEffect(() => {
     let mounted = true;
@@ -231,13 +329,19 @@ const State = () => {
               <p className="eyebrow">Area posts</p>
               <h3>What locals are talking about</h3>
               <p className="section-sub">Fresh experiences, guides, and hidden gems from the community.</p>
+              <span className="section-count">
+                {postsMeta.totalPosts} {postsMeta.totalPosts === 1 ? "post" : "posts"}
+              </span>
             </div>
             <div className="filter-bar">
               <label htmlFor="city-filter">Filter by city</label>
               <select
                 id="city-filter"
                 value={cityFilter}
-                onChange={(e) => setCityFilter(e.target.value)}
+                onChange={(e) => {
+                  setCityFilter(e.target.value);
+                  setPostsPage(1);
+                }}
               >
                 <option value="">All cities</option>
                 {availableCities.map((city) => (
@@ -260,6 +364,13 @@ const State = () => {
               ))}
             </div>
           )}
+
+          <RoundedPagination
+            currentPage={postsMeta.currentPage}
+            totalPages={postsMeta.totalPages}
+            onPageChange={setPostsPage}
+            disabled={loading}
+          />
         </section>
 
         {/* Guides Section */}
@@ -275,7 +386,10 @@ const State = () => {
               <select
                 id="city-filter-guides"
                 value={cityFilter}
-                onChange={(e) => setCityFilter(e.target.value)}
+                onChange={(e) => {
+                  setCityFilter(e.target.value);
+                  setPostsPage(1);
+                }}
               >
                 <option value="">All cities</option>
                 {availableCities.map((city) => (

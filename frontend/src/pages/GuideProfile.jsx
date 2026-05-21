@@ -16,6 +16,7 @@ const getGuideSlug = (guide) =>
   encodeURIComponent(guide?._id || guide?.name || "guide");
 
 const normalizeText = (value) => String(value || "").trim().toLowerCase();
+const normalizeId = (value) => String(value?._id || value || "").trim();
 
 const resolveGuideMatch = (guides, guideId, fallbackGuide) => {
   const decodedId = decodeURIComponent(guideId || "");
@@ -103,10 +104,11 @@ const GuideProfile = () => {
         setGuide(resolvedGuide);
 
         const allPosts = Array.isArray(postsResponse?.posts) ? postsResponse.posts : [];
-        const nextGuidePosts = resolvedGuide?._id
+        const resolvedGuideId = normalizeId(resolvedGuide?._id);
+        const nextGuidePosts = resolvedGuideId
           ? allPosts.filter((post) => {
-              const ownerId = post?.postedBy?._id || post?.postedBy;
-              return ownerId === resolvedGuide._id;
+              const ownerId = normalizeId(post?.postedBy);
+              return ownerId === resolvedGuideId;
             })
           : [];
 

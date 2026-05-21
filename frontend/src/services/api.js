@@ -4,9 +4,8 @@ const POSTS_BASE_URL = `${API_BASE}/api/posts`;
 const BOOKINGS_BASE_URL = `${API_BASE}/api/bookings`;
 const REVIEWS_BASE_URL = `${API_BASE}/api/reviews`;
 const CHAT_BASE_URL = `${API_BASE}/api/chat`;
+const ITINERARY_BASE_URL = `${API_BASE}/api/itinerary`;
 
-// Local fallback data to avoid noisy 404s when the guides API
-// hasn't been implemented on the backend yet.
 const fallbackGuides = [
   {
     _id: "demo-1",  
@@ -218,6 +217,40 @@ export const deletePost = async (postId) => {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
   return parseJSON(res);
+};
+
+export const getNotifications = async ({ page = 1, limit = 20 } = {}) => {
+  const token = localStorage.getItem("token");
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+
+  const res = await fetch(`${API_BASE}/api/notifications?${params.toString()}`, {
+    headers: buildAuthHeaders(token),
+  });
+
+  return parseJSONOrThrow(res);
+};
+
+export const markNotificationAsRead = async (notificationId) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_BASE}/api/notifications/${notificationId}/read`, {
+    method: "PUT",
+    headers: buildAuthHeaders(token),
+  });
+
+  return parseJSONOrThrow(res);
+};
+
+export const markAllNotificationsAsRead = async () => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_BASE}/api/notifications/read-all`, {
+    method: "PUT",
+    headers: buildAuthHeaders(token),
+  });
+
+  return parseJSONOrThrow(res);
 };
 
 export const likePost = async (postId) => {
@@ -443,4 +476,126 @@ export const getUnreadChatCount = async () => {
     headers: buildAuthHeaders(token),
   });
   return parseJSONOrThrow(res);
+};
+
+export const createItinerary = async ({ title, destination, startDate, endDate }) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${ITINERARY_BASE_URL}/create`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...buildAuthHeaders(token),
+    },
+    body: JSON.stringify({ title, destination, startDate, endDate }),
+  });
+  return parseJSONOrThrow(res);
+};
+
+export const addPostToItinerary = async (itineraryId, { postId, day, time, notes }) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${ITINERARY_BASE_URL}/${itineraryId}/add`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...buildAuthHeaders(token),
+    },
+    body: JSON.stringify({ postId, day, time, notes }),
+  });
+  return parseJSONOrThrow(res);
+};
+
+export const getMyItineraries = async () => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${ITINERARY_BASE_URL}/`, {
+    headers: buildAuthHeaders(token),
+  });
+  return parseJSONOrThrow(res);
+};
+
+export const getItinerary = async (itineraryId) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${ITINERARY_BASE_URL}/${itineraryId}`, {
+    headers: buildAuthHeaders(token),
+  });
+  return parseJSONOrThrow(res);
+};
+
+export const updateItineraryActivity = async (itineraryId, activityId, payload) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${ITINERARY_BASE_URL}/${itineraryId}/activity/${activityId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...buildAuthHeaders(token),
+    },
+    body: JSON.stringify(payload),
+  });
+  return parseJSONOrThrow(res);
+};
+
+export const removeItineraryActivity = async (itineraryId, activityId) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${ITINERARY_BASE_URL}/${itineraryId}/activity/${activityId}`, {
+    method: "DELETE",
+    headers: buildAuthHeaders(token),
+  });
+  return parseJSONOrThrow(res);
+};
+
+export const reorderItineraryActivities = async (itineraryId, activities) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${ITINERARY_BASE_URL}/${itineraryId}/reorder`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...buildAuthHeaders(token),
+    },
+    body: JSON.stringify({ activities }),
+  });
+  return parseJSONOrThrow(res);
+};
+
+export const deleteItinerary = async (itineraryId) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${ITINERARY_BASE_URL}/${itineraryId}`, {
+    method: "DELETE",
+    headers: buildAuthHeaders(token),
+  });
+  return parseJSONOrThrow(res);
+};
+
+export const shareItinerary = async (itineraryId) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${ITINERARY_BASE_URL}/${itineraryId}/share`, {
+    method: "POST",
+    headers: buildAuthHeaders(token),
+  });
+  return parseJSONOrThrow(res);
+};
+
+export const getSharedItinerary = async (shareCode) => {
+  const res = await fetch(`${ITINERARY_BASE_URL}/shared/${shareCode}`);
+  return parseJSONOrThrow(res);
+};
+
+export const getItineraryExportUrl = (itineraryId) => {
+  return `${ITINERARY_BASE_URL}/${itineraryId}/export`;
+};
+
+export const exportItineraryPDF = async (itineraryId) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(getItineraryExportUrl(itineraryId), {
+    headers: buildAuthHeaders(token),
+  });
+
+  if (!res.ok) {
+    const contentType = res.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+      const data = await parseJSON(res);
+      throw new Error(data?.message || data?.error || "Unable to export itinerary.");
+    }
+    throw new Error(`Unable to export itinerary. Status ${res.status}`);
+  }
+
+  return res.blob();
 };

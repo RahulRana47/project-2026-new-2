@@ -12,6 +12,8 @@ import GuideProfile from "./pages/GuideProfile";
 import AdminPanel from "./pages/AdminPanel";
 import BookingsPage from "./pages/BookingsPage";
 import MessagesPage from "./pages/MessagesPage";
+import ItineraryPage from "./pages/ItineraryPage";
+import SharedItineraryPage from "./pages/SharedItineraryPage";
 
 function App() {
   return (
@@ -37,6 +39,8 @@ function App() {
         <Route path="/guide/:guideId" element={<GuideProfile />} />
         <Route path="/dashboard/bookings" element={<BookingsPage />} />
         <Route path="/dashboard/messages" element={<MessagesPage />} />
+        <Route path="/dashboard/itinerary" element={<ItineraryPage />} />
+        <Route path="/itinerary/shared/:shareCode" element={<SharedItineraryPage />} />
         <Route
           path="/dashboard/myprofile"
           element={

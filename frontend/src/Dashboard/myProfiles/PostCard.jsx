@@ -1,21 +1,27 @@
 import { useRef, useState, useEffect, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { createPortal } from "react-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCommentDots, faTrashAlt } from "@fortawesome/free-solid-svg-icons";
+import { faCalendarCheck, faCommentDots, faTrashAlt, faCheckCircle, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
 
 import {
+  addPostToItinerary,
+  createItinerary,
   updatePost,
   deletePost,
   likePost,
   dislikePost,
   commentPost,
   getMe,
+  getMyItineraries,
   deleteComment,
+  createBooking,
 } from "../../services/api";
 
 import "./PostCard.css";
 
 const PostCard = ({ post, refreshPosts, currentUser, showMenu = false }) => {
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [editValue, setEditValue] = useState("");
@@ -28,6 +34,31 @@ const PostCard = ({ post, refreshPosts, currentUser, showMenu = false }) => {
   const [liked, setLiked] = useState(false);
   const [showCommentBox, setShowCommentBox] = useState(false);
   const [commentText, setCommentText] = useState("");
+  const [showBookingForm, setShowBookingForm] = useState(false);
+  const [bookingSubmitting, setBookingSubmitting] = useState(false);
+  const [bookingMessage, setBookingMessage] = useState("");
+  const [bookingError, setBookingError] = useState("");
+  const [toast, setToast] = useState(null);
+  const [bookingForm, setBookingForm] = useState({
+    tourDate: "",
+    numberOfPeople: 1,
+    specialRequests: "",
+  });
+  const [showItineraryForm, setShowItineraryForm] = useState(false);
+  const [itineraries, setItineraries] = useState([]);
+  const [itineraryLoading, setItineraryLoading] = useState(false);
+  const [itinerarySubmitting, setItinerarySubmitting] = useState(false);
+  const [itineraryMessage, setItineraryMessage] = useState("");
+  const [itineraryError, setItineraryError] = useState("");
+  const [itineraryForm, setItineraryForm] = useState({
+    itineraryId: "",
+    day: 1,
+    time: "10:00 AM",
+    notes: "",
+    newTitle: "My Trip Plan",
+    newStartDate: new Date().toISOString().slice(0, 10),
+    newEndDate: new Date().toISOString().slice(0, 10),
+  });
 
   const menuRef = useRef();
 
@@ -47,6 +78,14 @@ const PostCard = ({ post, refreshPosts, currentUser, showMenu = false }) => {
 
   const viewerId = (currentUser && currentUser._id) || (me && me._id) || null;
   const isOwner = viewerId ? postOwnerId === viewerId : false;
+  const viewerRole = String(currentUser?.role || me?.role || "").toLowerCase();
+  const isTourist = viewerRole === "tourist";
+  const token = localStorage.getItem("token");
+  const pricePerPerson = Number(post?.price);
+  const hasBookablePrice = Number.isFinite(pricePerPerson) && pricePerPerson >= 0;
+  const totalPrice = hasBookablePrice
+    ? pricePerPerson * Number(bookingForm.numberOfPeople || 1)
+    : null;
 
   const avatarSrc = postOwner?.avatar
     ? postOwner.avatar.startsWith("http")
@@ -138,6 +177,17 @@ const PostCard = ({ post, refreshPosts, currentUser, showMenu = false }) => {
     };
   }, [menuOpen]);
 
+  // Auto-dismiss toast after 4 seconds
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(timer);
+  }, [toast]);
+
+  const showToast = (type, message) => {
+    setToast({ type, message });
+  };
+
   const getCommentOwnerId = (c) =>
     c?.commentedBy?._id ||
     c?.user?._id ||
@@ -228,6 +278,182 @@ const PostCard = ({ post, refreshPosts, currentUser, showMenu = false }) => {
     setLoading(false);
   };
 
+  const handleBookingChange = (event) => {
+    const { name, value } = event.target;
+    setBookingForm((current) => ({ ...current, [name]: value }));
+  };
+
+  const openBookingForm = () => {
+    setBookingMessage("");
+    setBookingError("");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    setShowBookingForm(true);
+  };
+
+  const handleBookingSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    if (!isTourist) {
+      setBookingError("Only tourist accounts can create bookings.");
+      setBookingMessage("");
+      return;
+    }
+
+    if (!post?._id) {
+      setBookingError("This post cannot be booked right now.");
+      setBookingMessage("");
+      return;
+    }
+
+    if (!bookingForm.tourDate) {
+      setBookingError("Please choose a tour date.");
+      setBookingMessage("");
+      return;
+    }
+
+    const normalizedPeople = Number(bookingForm.numberOfPeople);
+    if (!Number.isFinite(normalizedPeople) || normalizedPeople < 1 || normalizedPeople > 20) {
+      setBookingError("Number of people must be between 1 and 20.");
+      setBookingMessage("");
+      return;
+    }
+
+    if (!hasBookablePrice) {
+      setBookingError("This post needs a valid price before tourists can book it.");
+      setBookingMessage("");
+      return;
+    }
+
+    setBookingSubmitting(true);
+    setBookingError("");
+    setBookingMessage("");
+
+    try {
+      const response = await createBooking({
+        postId: post._id,
+        tourDate: new Date(bookingForm.tourDate).toISOString(),
+        numberOfPeople: normalizedPeople,
+        specialRequests: bookingForm.specialRequests,
+      });
+
+      showToast("success", response?.message || "Booking request sent successfully!");
+      window.dispatchEvent(new CustomEvent("notification:sync"));
+      setBookingForm({
+        tourDate: "",
+        numberOfPeople: 1,
+        specialRequests: "",
+      });
+      setShowBookingForm(false);
+    } catch (err) {
+      showToast("error", err?.message || "Unable to send booking request.");
+    } finally {
+      setBookingSubmitting(false);
+    }
+  };
+
+  const loadItineraryOptions = async () => {
+    setItineraryLoading(true);
+    setItineraryError("");
+
+    try {
+      const data = await getMyItineraries();
+      const nextItineraries = Array.isArray(data?.itineraries) ? data.itineraries : [];
+      setItineraries(nextItineraries);
+      setItineraryForm((current) => ({
+        ...current,
+        itineraryId: current.itineraryId || nextItineraries[0]?._id || "new",
+      }));
+    } catch (err) {
+      setItineraryError(err?.message || "Unable to load your itineraries.");
+    } finally {
+      setItineraryLoading(false);
+    }
+  };
+
+  const openItineraryForm = async () => {
+    setItineraryMessage("");
+    setItineraryError("");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    if (!isTourist) {
+      setItineraryError("Only tourist accounts can add posts to itineraries.");
+      setShowItineraryForm(true);
+      return;
+    }
+
+    setShowItineraryForm(true);
+    await loadItineraryOptions();
+  };
+
+  const handleItineraryChange = (event) => {
+    const { name, value } = event.target;
+    setItineraryForm((current) => ({ ...current, [name]: value }));
+  };
+
+  const handleItinerarySubmit = async (event) => {
+    event.preventDefault();
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    if (!isTourist) {
+      setItineraryError("Only tourist accounts can add posts to itineraries.");
+      return;
+    }
+
+    setItinerarySubmitting(true);
+    setItineraryMessage("");
+    setItineraryError("");
+
+    try {
+      let targetId = itineraryForm.itineraryId;
+
+      if (!targetId || targetId === "new") {
+        const created = await createItinerary({
+          title: itineraryForm.newTitle || "My Trip Plan",
+          destination: post.location && typeof post.location === "object" ? post.location : {},
+          startDate: itineraryForm.newStartDate,
+          endDate: itineraryForm.newEndDate,
+        });
+        targetId = created?.itinerary?._id;
+      }
+
+      if (!targetId) {
+        throw new Error("Please choose or create an itinerary.");
+      }
+
+      const response = await addPostToItinerary(targetId, {
+        postId: post._id,
+        day: Number(itineraryForm.day || 1),
+        time: itineraryForm.time,
+        notes: itineraryForm.notes,
+      });
+
+      setItineraryMessage(response?.message || "Added to itinerary.");
+      await loadItineraryOptions();
+    } catch (err) {
+      setItineraryError(err?.message || "Unable to add post to itinerary.");
+    } finally {
+      setItinerarySubmitting(false);
+    }
+  };
+
   return (
     <div className="post-card">
       {/* HEADER */}
@@ -292,6 +518,18 @@ const PostCard = ({ post, refreshPosts, currentUser, showMenu = false }) => {
         <p>{post.price !== undefined ? `Price: Rs. ${post.price}` : "Price not provided"}</p>
       </div>
 
+      {/* TOAST NOTIFICATION */}
+      {toast && createPortal(
+        <div className={`post-toast post-toast--${toast.type}`} onClick={() => setToast(null)}>
+          <FontAwesomeIcon
+            icon={toast.type === "success" ? faCheckCircle : faExclamationCircle}
+            className="post-toast__icon"
+          />
+          <span className="post-toast__message">{toast.message}</span>
+        </div>,
+        document.body
+      )}
+
       {/* ACTION BUTTONS */}
       <div className="post-actions">
         <button
@@ -310,7 +548,237 @@ const PostCard = ({ post, refreshPosts, currentUser, showMenu = false }) => {
           <FontAwesomeIcon icon={faCommentDots} />
           <span>{comments.length}</span>
         </button>
+
+        <button
+          className="book-btn"
+          type="button"
+          onClick={openBookingForm}
+          disabled={!hasBookablePrice}
+          title={hasBookablePrice ? "Book this guide post" : "Price required before booking"}
+        >
+          <FontAwesomeIcon icon={faCalendarCheck} />
+          <span>Book</span>
+        </button>
+
+        <button
+          className="itinerary-btn"
+          type="button"
+          onClick={openItineraryForm}
+          title="Add this post to an itinerary"
+        >
+          <i className="fa fa-map"></i>
+          <span>Itinerary</span>
+        </button>
       </div>
+
+      {itineraryMessage ? (
+        <div className="post-booking-message is-success">
+          <span>{itineraryMessage}</span>
+          <Link to="/dashboard/itinerary">Open itinerary</Link>
+        </div>
+      ) : null}
+
+      {itineraryError && !showItineraryForm ? (
+        <div className="post-booking-message is-error">{itineraryError}</div>
+      ) : null}
+
+      {showBookingForm && createPortal(
+        <div className="booking-modal" role="dialog" aria-label="Book guide">
+          <div className="booking-panel">
+            <div className="booking-panel__header">
+              <div>
+                <h4>Book this guide</h4>
+                <p>{post.title || ownerName}</p>
+              </div>
+              <button type="button" onClick={() => setShowBookingForm(false)}>
+                Close
+              </button>
+            </div>
+
+            <form className="post-booking-form" onSubmit={handleBookingSubmit}>
+              {!isTourist ? (
+                <div className="post-booking-message is-error">
+                  Only tourist accounts can create bookings.
+                </div>
+              ) : null}
+
+              <label>
+                Tour date
+                <input
+                  type="datetime-local"
+                  name="tourDate"
+                  value={bookingForm.tourDate}
+                  onChange={handleBookingChange}
+                  required
+                />
+              </label>
+
+              <label>
+                People
+                <input
+                  type="number"
+                  min="1"
+                  max="20"
+                  name="numberOfPeople"
+                  value={bookingForm.numberOfPeople}
+                  onChange={handleBookingChange}
+                  required
+                />
+              </label>
+
+              <label>
+                Special requests
+                <textarea
+                  name="specialRequests"
+                  rows="4"
+                  maxLength="500"
+                  value={bookingForm.specialRequests}
+                  onChange={handleBookingChange}
+                  placeholder="Pickup point, language, food, or timing notes"
+                />
+              </label>
+
+              <div className="post-booking-summary">
+                <span>Estimated total</span>
+                <strong>{totalPrice !== null ? `Rs. ${totalPrice}` : "Unavailable"}</strong>
+              </div>
+
+              <button
+                type="submit"
+                className="submit-booking-btn"
+                disabled={bookingSubmitting || !isTourist || !hasBookablePrice}
+              >
+                {bookingSubmitting ? "Sending..." : "Send booking request"}
+              </button>
+            </form>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {showItineraryForm && createPortal(
+        <div className="booking-modal" role="dialog" aria-label="Add post to itinerary">
+          <div className="booking-panel">
+            <div className="booking-panel__header">
+              <div>
+                <h4>Add to itinerary</h4>
+                <p>{post.title || ownerName}</p>
+              </div>
+              <button type="button" onClick={() => setShowItineraryForm(false)}>
+                Close
+              </button>
+            </div>
+
+            <form className="post-booking-form" onSubmit={handleItinerarySubmit}>
+              {!isTourist ? (
+                <div className="post-booking-message is-error">
+                  Only tourist accounts can add posts to itineraries.
+                </div>
+              ) : null}
+
+              {itineraryLoading ? <p className="muted">Loading itineraries...</p> : null}
+              {itineraryError ? <div className="post-booking-message is-error">{itineraryError}</div> : null}
+              {itineraryMessage ? <div className="post-booking-message is-success">{itineraryMessage}</div> : null}
+
+              <label>
+                Itinerary
+                <select
+                  name="itineraryId"
+                  value={itineraryForm.itineraryId}
+                  onChange={handleItineraryChange}
+                >
+                  {itineraries.map((itinerary) => (
+                    <option key={itinerary._id} value={itinerary._id}>
+                      {itinerary.title}
+                    </option>
+                  ))}
+                  <option value="new">Create new itinerary</option>
+                </select>
+              </label>
+
+              {itineraryForm.itineraryId === "new" ? (
+                <>
+                  <label>
+                    New itinerary title
+                    <input
+                      name="newTitle"
+                      value={itineraryForm.newTitle}
+                      onChange={handleItineraryChange}
+                      required
+                    />
+                  </label>
+                  <div className="booking-form-grid">
+                    <label>
+                      Start date
+                      <input
+                        type="date"
+                        name="newStartDate"
+                        value={itineraryForm.newStartDate}
+                        onChange={handleItineraryChange}
+                        required
+                      />
+                    </label>
+                    <label>
+                      End date
+                      <input
+                        type="date"
+                        name="newEndDate"
+                        value={itineraryForm.newEndDate}
+                        onChange={handleItineraryChange}
+                        required
+                      />
+                    </label>
+                  </div>
+                </>
+              ) : null}
+
+              <div className="booking-form-grid">
+                <label>
+                  Day
+                  <input
+                    type="number"
+                    min="1"
+                    name="day"
+                    value={itineraryForm.day}
+                    onChange={handleItineraryChange}
+                    required
+                  />
+                </label>
+                <label>
+                  Time
+                  <input
+                    name="time"
+                    value={itineraryForm.time}
+                    onChange={handleItineraryChange}
+                    required
+                  />
+                </label>
+              </div>
+
+              <label>
+                Notes
+                <textarea
+                  name="notes"
+                  rows="3"
+                  maxLength="500"
+                  value={itineraryForm.notes}
+                  onChange={handleItineraryChange}
+                  placeholder="Why this spot belongs in the plan"
+                />
+              </label>
+
+              <button
+                type="submit"
+                className="submit-booking-btn"
+                disabled={itinerarySubmitting || itineraryLoading || !isTourist}
+              >
+                {itinerarySubmitting ? "Adding..." : "Add to itinerary"}
+              </button>
+            </form>
+          </div>
+        </div>,
+        document.body
+      )}
 
       {/* COMMENTS PANEL */}
       {showCommentBox && (

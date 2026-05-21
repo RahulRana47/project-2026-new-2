@@ -113,6 +113,18 @@
   margin: 4px 0 12px;
 }
 
+.section-count {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #dbeafe;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-radius: 999px;
+  padding: 7px 12px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
 .filter-bar {
   display: flex;
   align-items: center;
@@ -222,6 +234,83 @@
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 18px;
   margin-top: 12px;
+}
+
+.rounded-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 18px auto 0;
+  padding: 12px;
+  width: fit-content;
+  max-width: 100%;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+}
+
+.pagination-page,
+.pagination-arrow {
+  width: 44px;
+  height: 44px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, color 0.16s ease, transform 0.16s ease;
+}
+
+.pagination-arrow {
+  font-size: 30px;
+  color: #475569;
+}
+
+.pagination-page:hover,
+.pagination-arrow:hover {
+  border-color: #60a5fa;
+  color: #1d4ed8;
+  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.14);
+  transform: translateY(-1px);
+}
+
+.pagination-page.is-active {
+  background: #1f2937;
+  border-color: #1f2937;
+  color: #ffffff;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.22);
+}
+
+.pagination-page:disabled,
+.pagination-arrow:disabled {
+  cursor: default;
+  transform: none;
+  box-shadow: none;
+}
+
+.pagination-arrow:disabled {
+  opacity: 0.38;
+}
+
+.pagination-page.is-active:disabled {
+  opacity: 1;
+}
+
+.pagination-ellipsis {
+  min-width: 28px;
+  text-align: center;
+  color: #0f172a;
+  font-size: 17px;
+  font-weight: 800;
 }
 
 /* Guides */
