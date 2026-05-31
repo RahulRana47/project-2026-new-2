@@ -324,7 +324,7 @@ export default function AdminPanel() {
                   const imageSrc = image
                     ? image.startsWith("http")
                       ? image
-                      : `http://localhost:5000/uploads/${image}`
+                      : `${import.meta.env.VITE_API_URL || "https://gullyguide-backend.onrender.com"}/uploads/${image}`
                     : "/default_profile.jpg";
                   const guideSlug = encodeURIComponent(guide?._id || guide?.name || `guide-${index}`);
                   const guideLocation =

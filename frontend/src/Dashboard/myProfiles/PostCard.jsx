@@ -20,6 +20,8 @@ import BookingModal from "../../components/BookingModal";
 
 import "./PostCard.css";
 
+const API_BASE = import.meta.env.VITE_API_URL || "https://gullyguide-backend.onrender.com";
+
 const PostCard = ({ post, refreshPosts, currentUser, showMenu = false }) => {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -79,7 +81,7 @@ const PostCard = ({ post, refreshPosts, currentUser, showMenu = false }) => {
   const avatarSrc = postOwner?.avatar
     ? postOwner.avatar.startsWith("http")
       ? postOwner.avatar
-      : `http://localhost:5000/uploads/${postOwner.avatar}`
+      : `${API_BASE}/uploads/${postOwner.avatar}`
     : post?.avatar || "/default_profile.jpg";
 
   const locationLabel = useMemo(() => {

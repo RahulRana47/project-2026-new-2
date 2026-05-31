@@ -5,6 +5,8 @@ import PostCard from "../Dashboard/myProfiles/PostCard";
 import Navbar from "../Dashboard/Navbar";
 import "./State.css";
 
+const API_BASE = import.meta.env.VITE_API_URL || "https://gullyguide-backend.onrender.com";
+
 const POSTS_PAGE_SIZE = 12;
 
 const buildPageItems = (currentPage, totalPages) => {
@@ -176,7 +178,7 @@ const State = () => {
   const getGuideImage = (guide) => {
     const src = guide?.avatar || guide?.photo || guide?.image;
     if (!src) return "/default_profile.jpg";
-    return src.startsWith("http") ? src : `http://localhost:5000/uploads/${src}`;
+    return src.startsWith("http") ? src : `${API_BASE}/uploads/${src}`;
   };
 
   useEffect(() => {

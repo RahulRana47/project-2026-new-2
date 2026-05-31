@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import "./Login.css";
 
+const API_BASE = import.meta.env.VITE_API_URL || "https://gullyguide-backend.onrender.com";
+
 export default function ResetPassword() {
   const { token } = useParams();
 
@@ -10,7 +12,7 @@ export default function ResetPassword() {
 
   const submit = async () => {
     const res = await fetch(
-      `http://localhost:5000/api/users/password/reset/${token}`,
+      `${API_BASE}/api/users/password/reset/${token}`,
       {
         method: "PUT",
         headers: { "Content-Type": "application/json" },

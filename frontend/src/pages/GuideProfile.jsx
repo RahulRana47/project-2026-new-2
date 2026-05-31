@@ -13,6 +13,8 @@ import {
 } from "../services/api";
 import "./GuideProfile.css";
 
+const API_BASE = import.meta.env.VITE_API_URL || "https://gullyguide-backend.onrender.com";
+
 const getGuideSlug = (guide) =>
   encodeURIComponent(guide?._id || guide?.name || "guide");
 
@@ -192,7 +194,7 @@ const GuideProfile = () => {
   const avatarSrc = useMemo(() => {
     const src = guide?.avatar || guide?.photo || guide?.image;
     if (!src) return "/default_profile.jpg";
-    return src.startsWith("http") ? src : `http://localhost:5000/uploads/${src}`;
+    return src.startsWith("http") ? src : `${API_BASE}/uploads/${src}`;
   }, [guide]);
 
   const selectedPost = useMemo(

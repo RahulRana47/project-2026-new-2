@@ -1,6 +1,8 @@
 import { useState } from "react";
 import "./Login.css";
 
+const API_BASE = import.meta.env.VITE_API_URL || "https://gullyguide-backend.onrender.com";
+
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -15,7 +17,7 @@ export default function ForgotPassword() {
       setLoading(true);
 
       const res = await fetch(
-        "http://localhost:5000/api/users/password/forgot",
+        `${API_BASE}/api/users/password/forgot`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

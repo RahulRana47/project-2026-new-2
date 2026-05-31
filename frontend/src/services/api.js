@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
+const API_BASE = import.meta.env.VITE_API_URL || "https://gullyguide-backend.onrender.com";
 const AUTH_BASE_URL = `${API_BASE}/api/users`;
 const POSTS_BASE_URL = `${API_BASE}/api/posts`;
 const BOOKINGS_BASE_URL = `${API_BASE}/api/bookings`;

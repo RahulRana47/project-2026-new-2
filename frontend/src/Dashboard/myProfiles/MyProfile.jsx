@@ -6,7 +6,7 @@ import CreatePost from "./CreatePost";
 import PostCard from "./PostCard";
 import "./MyProfile.css";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
+const API_BASE = import.meta.env.VITE_API_URL || "https://gullyguide-backend.onrender.com";
 
 const getImageSrc = (src) => {
   if (!src || src === "default-avatar-url" || src === "default_avatar.jpg") {
@@ -52,7 +52,7 @@ const MyProfile = () => {
 
   const fetchMyPosts = async () => {
     try {
-      const res = await fetch(`/api/posts/me`, {
+      const res = await fetch(`${API_BASE}/api/posts/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -131,7 +131,7 @@ const MyProfile = () => {
       // Append avatar file if user selected one
       if (avatarFile) form.append("avatar", avatarFile);
 
-      const res = await fetch(`/api/users/me/update`, {
+      const res = await fetch(`${API_BASE}/api/users/me/update`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
